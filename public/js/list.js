@@ -1,10 +1,12 @@
+let test;
 function showEditForm(id){
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', `api/get.php?id=${id}`, true);
+	xhr.open('GET', `get?id=${id}`, true);
 	let result;
 	xhr.send();
 	xhr.onload = function(){
 		result = JSON.parse(xhr.responseText);
+		console.log(test);
 		createForm(result, 'api/edit.php', true, id);
 	}
 	xhr.onerror = function(){
@@ -457,6 +459,7 @@ function getGamecards(){
 
 	xhr.onload = function(){
 		database = this.responseText;
+		test = database;
 		showCase.innerHTML = '';
 		fillShowCase(database);
 		setTimeout(function(){
