@@ -11,9 +11,15 @@ app.get('/list', function(req, res){
     
     let options = {
         root: __dirname + '/public/',
-        
     }
 
+    res.sendFile('list.html', options, function(err){
+        if(err){
+            console.log('Error')
+        }else{
+            console.log('File sent')
+        }
+    })
 });
 
 app.listen(3000, function(){
