@@ -1,0 +1,193 @@
+/* .gamecard{
+    
+}
+
+.gamecard:hover{
+    
+} */
+
+/* edit-form */
+
+.edit-form__wrapper{
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.edit-form{
+    background-color: #fff;
+    box-shadow: 0 1px 4px 0 rgba(32,33,36,0.28);
+    width: 1200px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+	padding: 20px;
+	opacity: 1;
+    transition: opacity 0.4s;
+}
+
+.edit-form__hidden{
+	opacity: 0;
+}
+
+.edit-form__header{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.edit-form__info{
+    width: 100%;
+    padding-right: 20px;
+}
+
+.edit-form__title-wrapper{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.edit-form__title-input{
+	font-size: 32px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.edit-form__image-wrapper{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.edit-form__image-label{
+    width: 274px;
+    height: 274px;
+}
+
+.edit-form__image{
+    min-width: 274px;
+    height: 274px;
+    
+    /* Upload */
+    border: 2px dashed rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    border-radius: 10px;
+    transition: border-color 0.2s;
+}
+
+.edit-form__image:hover{
+    border-color: rgba(0, 0, 0, 0.6);
+}
+
+.edit-form__image-input{
+    display: none;
+}
+
+.edit-form__description{
+	font-family: "Open sans", Arial, sans-serif;
+    font-size: 16px;
+    width: 100%;
+    height: 200px;
+	resize: none;
+	padding-left: 10px;
+	padding-right: 10px;
+    box-sizing: border-box;
+    margin-bottom: -4px;
+}
+
+.edit-form__footer{
+    display: flex;
+	justify-content: space-between;
+	margin-bottom: 30px;
+}
+
+.edit-form__price-input{
+	font-size: 24px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.edit-form__platforms{
+    border: 1px solid rgba(0, 0, 0, 0.3);
+	display: flex;
+	justify-content: space-around;
+	width: 170px;
+	padding: 4px 0;
+}
+
+.edit-form__platform-checkbox{
+	display: none;
+}
+
+.edit-form__platform-label{
+    display: block;
+    font-size: 0;
+    line-height: 0;
+    width: 42px;
+    height: 42px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* margin-right: 13px; */
+	opacity: 0.1;
+    transition: opacity 0.2s;
+    cursor: pointer;
+}
+
+.edit-form__windows-label{
+	background-image: url(../img/icons/gamecard__win.svg);
+}
+
+.edit-form__mac-label{
+	background-image: url(../img/icons/gamecard__mac.svg);
+}
+
+.edit-form__steamos-label{
+	background-image: url(../img/icons/gamecard__steam.svg);
+}
+
+.edit-form__platform-label:hover{
+	opacity: 0.2;
+}
+
+.edit-form__platform-checkbox:checked + .edit-form__platform-label{
+	opacity: 0.4;
+}
+
+.edit-form__submit-wrapper{
+	margin: 0 auto;
+	display: flex;
+}
+
+.edit-form__button{
+	background-color: transparent;
+    border: none;
+    border-radius: 5px;
+	font-size: 16px;
+	padding: 10px;
+    margin-right: 20px;
+    cursor: pointer;
+    box-shadow: 0 1px 4px 0 rgba(32,33,36,0.28);
+    width: 138px;
+    box-sizing: border-box;
+}
+
+.edit-form__button--accept{
+    background-color: #1a73e8;
+    color: #fff;
+}
+
+/* .edit-form__button:hover{
+	
+} */
+
+.edit-form__button--delete{
+    margin: 0;
+    margin-left: auto;
+    color: #fff;
+    background-color: #ff6868;
+}

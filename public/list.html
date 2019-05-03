@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/list.css">
+	<title>GameStore</title>
+</head>
+<body>
+	<div class="blur-wrapper blur-effect">
+		<div class="main-header__wrapper">
+			<header class="main-header container">
+				<h2 class="main-header__title">GameStore</h2>
+			</header>
+		</div>
+		<section class="filter container">
+			<p class="filter__title">Упорядочить по:</p>
+			<div class="filter__buttons">
+				<a href="#" class="filter__link filter__link--active">Рейтингу</a>
+				<a href="#" class="filter__link">Цене</a>
+				<a href="#" class="filter__link">Голосам</a>
+				<a href="#" class="filter__link">Алфавиту</a>
+			</div>
+		</section>
+		<section class="add container">
+			<p class="add__title">Добавить игру:</p>
+			<a href="#" class="add__button">Добавить</a>
+		</section>
+		<main class="showcase container">
+		</main>
+	</div>
+	<div class="loader__wrapper">
+	<div class="loader">
+		<div class="inner one"></div>
+		<div class="inner two"></div>
+		<div class="inner three"></div>
+	  </div>
+	</div>
+	<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="blur-svg">
+		<defs>
+			<filter id="blur-filter">
+				<feGaussianBlur stdDeviation="3"></feGaussianBlur>
+			</filter>
+		</defs>
+	</svg>
+	<!-- <script src="js/main.js"></script> -->
+	<script src="js/list.js"></script>
+</body>
+</html>

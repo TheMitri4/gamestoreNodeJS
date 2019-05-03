@@ -1,0 +1,121 @@
+<!-- edit-form -->
+
+<form action="" class="edit-form edit-form__hidden">
+	<header class="edit-form__header">
+		<div class="edit-form__info">
+			<div class="edit-form__title-wrapper">
+				<input type="text" name="title" class="edit-form__title-input" value="Dota 2">
+				<p class="edit-form__rating gamecard__rating">7.4</p>
+			</div>
+			<textarea name="description" class="edit-form__description">Ежедневно миллионы игроков по всему миру вступают в битву от лица одного из более сотни героев Dota 2. Неважно, будет это десятый или тысячный час в игре — в ней всегда есть место чему-то новому. Регулярные обновления не дают стоять на месте игровому процессу, возможностям и героям, отчего Dota 2 поистине живёт собственной жизнью.</textarea>
+		</div>
+		<div class="edit-form__image-wrapper">
+			<label for="image-upload"><img src="img/placeholder.png" alt="" width="170" height="170" class="edit-form__image"></label>
+			<input type="file" id="image-upload" name="image"  class="edit-form__image-input">
+		</div>
+	</header>
+	<footer class="edit-form__footer">
+		<input type="text" name="price" class="edit-form__price-input" value="Бесплатно">
+		<div class="edit-form__platforms">
+			<input type="checkbox" name="Windows" id="windows" class="edit-form__platform-checkbox">
+			<label for="windows" class="edit-form__platform-label edit-form__windows-label"></label>
+			<input type="checkbox" name="MacOs" id="mac" class="edit-form__platform-checkbox">
+			<label for="mac" class="edit-form__platform-label edit-form__mac-label"></label>
+			<input type="checkbox" name="SteamOs" id="steamos" class="edit-form__platform-checkbox">
+			<label for="steamos" class="edit-form__platform-label edit-form__steamos-label"></label>
+		</div>
+	</footer>
+	<div class="edit-form__submit-wrapper">
+		<button type="submit" class="edit-form__button edit-form__button--accept">Сохранить</button>
+		<button class="edit-form__button edit-form__button--decline">Отменить</button>
+		<button class="edit-form__button edit-form__button--delete">Удалить</button>
+	</div>
+</form>
+
+<!-- gamecard -->
+
+<div class="showcase__card gamecard">
+	<header class="gamecard__header">
+		<div class="gamecard__info">
+			<div class="gamecard__title-wrapper">
+				<h3 class="gamecard__title">Dota 2</h3>
+				<p class="gamecard__rating">7.4</p>
+			</div>
+			<p class="gamecard__description">Ежедневно миллионы игроков по всему миру вступают в битву от лица одного из более сотни героев Dota 2. Неважно, будет это 	десятый или тысячный час в игре — в ней всегда есть место чему-то новому. Регулярные обновления не дают стоять на месте игровому процессу, возможностям и 	героям, отчего Dota 2 поистине живёт собственной жизнью.</p>
+		</div>
+		<img src="img/dota.jpg" alt="Dota2" width="170" height="170" class="gamecard__image">
+	</header>
+	<footer class="gamecard__footer">
+		<p class="gamecard__price">Free to play</p>
+		<div class="gamecard__platforms">
+			<p class="gamecard__platform gamecard__win">Windows</p>
+			<p class="gamecard__platform gamecard__steam">SteamOS</p>
+			<p class="gamecard__platform gamecard__mac-os">MacOs</p>
+		</div>
+	</footer>
+</div>
+
+
+
+// let formWrap = browserJSEngine(editFormTemplate(result));
+		// let form = formWrap.querySelector('form');
+		// let platforms = {
+		// 	windows: 'input[name="Windows"]',
+		// 	macos: 'input[name="MacOs"]',
+		// 	steamos: 'input[name="SteamOs"]'
+		// }
+		// result.platform.forEach(item => {
+		// 	form.querySelector(platforms[item.toLowerCase()]).checked = true;
+		// });
+		// form.setAttribute('data-id', id);
+		// document.body.appendChild(formWrap);
+		// document.body.style.overflowY = 'hidden';
+		// document.body.style.marginRight = `${scrollWidth}px`;
+		// setTimeout(function(){
+		// 	form.classList.remove('edit-form__hidden');
+		// 	blurWrapper.classList.add('blur-effect');
+		// }, 10);
+		// let documentRemove = (event) => {
+		// 	if(event.target != form && !form.contains(event.target)){
+		// 		hideForm(form);
+		// 		getGamecards();
+		// 		event.stopPropagation();
+		// 		document.removeEventListener('click', documentRemove);
+		// 	}
+		// }
+		// document.addEventListener('click', documentRemove, false);
+		// form.querySelector('.edit-form__button--decline').addEventListener('click', (event) => {
+		// 	event.preventDefault();
+		// 	hideForm(form);
+		// 	getGamecards();
+		// 	document.removeEventListener('click', documentRemove);
+		// });
+		// form.querySelector('.edit-form__button--accept').addEventListener('click', (event) => {
+		// 	event.preventDefault();
+		// 	sendEditForm(form, 'api/edit.php');
+		// 	document.removeEventListener('click', documentRemove);
+		// });
+		// form.querySelector('.edit-form__button--delete').addEventListener('click', (event) => {
+		// 	event.preventDefault();
+		// 	document.removeEventListener('click', documentRemove);
+		// 	deleteGame(form.dataset.id, form);
+		// });
+
+		// let dropArea = form.querySelector('.edit-form__image');
+
+		// ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+		// 	dropArea.addEventListener(eventName, preventDefaults, false);
+		// });
+
+		// function preventDefaults (event) {
+		// 	event.preventDefault();
+		// 	event.stopPropagation();
+		// }
+
+		// form.querySelector('.edit-form__image-input').addEventListener('change', function(){
+		// 	previewFile(this.files[0], dropArea);
+		// });
+
+		// dropArea.addEventListener('drop', (event) => {
+		// 	previewFile(event.dataTransfer.files[0], dropArea);
+		// });

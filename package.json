@@ -1,0 +1,14 @@
+{
+  "name": "yandex-gamestore-nodejs",
+  "version": "0.0.1",
+  "description": "NodeJS server for gamestore crud",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "TheMitri4",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
