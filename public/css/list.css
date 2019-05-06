@@ -191,3 +191,28 @@
     color: #fff;
     background-color: #ff6868;
 }
+
+.edit-form__error-locked{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    box-shadow: 0 1px 8px 0 rgba(32, 33, 36, 0.6);
+    width: 600px;
+    height: 60px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+.edit-form__error-locked-text{
+    margin: 0;
+    font-size: 18px;
+}
+
+.edit-form__error-locked--hidden{
+    display: none;
+}

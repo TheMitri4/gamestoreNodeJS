@@ -1,20 +1,34 @@
-let test;
 function showEditForm(id){
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', `get?id=${id}`, true);
 	let result;
 	xhr.send();
 	xhr.onload = function(){
-		result = JSON.parse(xhr.responseText);
-		console.log(test);
-		createForm(result, 'api/edit.php', true, id);
+		if(xhr.status === 200){
+			result = JSON.parse(xhr.responseText);
+			createForm(result, '/edit', true, id);
+		}
+		if(xhr.status === 423){
+			let errorBlock = document.querySelector('.edit-form__error-locked');
+			// errorBlock.style.display = 'flex';
+			errorBlock.classList.remove('edit-form__error-locked--hidden');
+			setTimeout(() => {
+				errorBlock.style.opacity = 1;
+			},10);
+			setTimeout(() => {
+				errorBlock.style.opacity = 0;
+				setTimeout(() => {
+					errorBlock.classList.add('edit-form__error-locked--hidden');
+				},400)
+			}, 1200);
+		}
 	}
 	xhr.onerror = function(){
 		console.log('Ошибка');
 	}
 }
 
-function sendEditForm(form, url){
+function sendEditForm(form, url, image){
 	let platforms = form.querySelectorAll('.edit-form__platform-checkbox');
 	let platformsArr = [];
 	platforms.forEach(item => {
@@ -28,34 +42,17 @@ function sendEditForm(form, url){
 	let gamePrice = form.querySelector('.edit-form__price-input').value;
 	let gameDescription = form.querySelector('.edit-form__description').value;
 
-	let body = `id=${gameId}&title=${encodeURIComponent(gameTitle)}&platform=${encodeURIComponent(platformsJson)}&price=${gamePrice}&description=${encodeURIComponent(gameDescription)}`;
+	let formData = new FormData();
+	formData.append('id', gameId);
+	formData.append('title', gameTitle);
+	formData.append('description', gameDescription);
+	formData.append('platform', platformsJson);
+	formData.append('price', gamePrice);
+	formData.append('image', image);
 	
-	// let data = {
-	// 	gameId: form.dataset.id,
-	// 	gameTitle: form.querySelector('.edit-form__title-input').value,
-	// 	gamePrice: form.querySelector('.edit-form__price-input').value,
-	// 	gameDescription: form.querySelector('.edit-form__description').value
-	// 	// platforms: platformsJson 
-	// }
-
-	// let boundary = String(Math.random()).slice(2);
-	// let boundaryMiddle = '--' + boundary + '\r\n';
-	// let boundaryLast = '--' + boundary + '--\r\n';
-
-	// let body = ['\r\n'];
-	// for(let key in data){
-	// 	body.push('Content-Disposition: form-data; name="' + key + '"\r\n\r\n' + data[key] + '\r\n')
-	// }
-
-	// body = body.join(boundaryMiddle) + boundaryLast;
-
-	// console.log(body);
-
 	let xhr = new XMLHttpRequest();
 	xhr.open('POST', url, true);
-	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	// xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
-	xhr.send(body);
+	xhr.send(formData);
 	xhr.onload = function(){
 		console.log('Все хорошо: ' + xhr.responseText);
 		hideForm(form);
@@ -69,7 +66,7 @@ function sendEditForm(form, url){
 
 document.querySelector('.add__button').addEventListener('click', (event) => {
 	event.preventDefault();
-	createForm({}, 'api/add.php');
+	createForm({}, '/add');
 });
 
 function createForm(data, sendUrl, edit, id){
@@ -87,7 +84,6 @@ function createForm(data, sendUrl, edit, id){
 		form.setAttribute('data-id', id);
 		form.querySelector('.edit-form__button--delete').addEventListener('click', (event) => {
 			event.preventDefault();
-			document.removeEventListener('click', documentRemove);
 			deleteGame(form.dataset.id, form);
 		});
 	}else{
@@ -105,7 +101,8 @@ function createForm(data, sendUrl, edit, id){
 		let clickStart = event.target;
 		if(event.target != form && !form.contains(event.target)){
 			event.target.addEventListener('mouseup', function(event){
-					if(clickStart == event.target){
+				if(clickStart == event.target){
+					unlockGame(id);
 					hideForm(form);
 					getGamecards();
 				}
@@ -115,12 +112,13 @@ function createForm(data, sendUrl, edit, id){
 
 	form.querySelector('.edit-form__button--decline').addEventListener('click', (event) => {
 		event.preventDefault();
+		unlockGame(id);
 		hideForm(form);
 		getGamecards();
 	});
 	form.querySelector('.edit-form__button--accept').addEventListener('click', (event) => {
 		event.preventDefault();
-		sendEditForm(form, sendUrl);
+		sendEditForm(form, sendUrl, newImage);
 	});
 	
 	let dropArea = form.querySelector('.edit-form__image');
@@ -132,12 +130,28 @@ function createForm(data, sendUrl, edit, id){
 		event.preventDefault();
 		event.stopPropagation();
 	}
+
+	let newImage;
+
 	form.querySelector('.edit-form__image-input').addEventListener('change', function(){
 		previewFile(this.files[0], dropArea);
+		newImage = this.files[0];
 	});
 	dropArea.addEventListener('drop', (event) => {
 		previewFile(event.dataTransfer.files[0], dropArea);
+		newImage = event.dataTransfer.files[0];
 	});
+}
+
+function unlockGame(id){
+	if(!id){
+		return;
+	}	
+	let xhr = new XMLHttpRequest();
+	xhr.open('POST', '/unlock', true);
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	let body = 'id=' + id;
+	xhr.send(body);
 }
 
 function hideForm(form){
@@ -160,7 +174,7 @@ function previewFile(file, container){
 
 function deleteGame(id, form){
 	let xhr = new XMLHttpRequest();
-	xhr.open('POST', 'api/delete.php', true);
+	xhr.open('POST', '/delete', true);
 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	let body = 'id=' + id;
 	xhr.send(body);
@@ -205,7 +219,7 @@ function gamecardTemplate(obj){
 									{
 										tag: 'p',
 										cls: 'gamecard__rating',
-										content: obj.rating
+										content: obj.rating + ''
 									}
 								]
 							},
@@ -320,7 +334,7 @@ function editFormTemplate(obj = {}) {
 					{
 						tag: 'input',
 						cls: 'edit-form__price-input',
-						attrs: {type: 'text', name: 'price', value: obj.price || 'Цена'}
+						attrs: {type: 'text', name: 'price', value: obj.price || 0}
 					},
 					{
 						tag: 'div',
@@ -450,7 +464,7 @@ function getGamecards(){
 
 	var xhr = new XMLHttpRequest();
 
-	xhr.open('GET', 'api/database.json', true);
+	xhr.open('GET', 'db/database.json', true);
 
 	xhr.send();
 
@@ -459,7 +473,6 @@ function getGamecards(){
 
 	xhr.onload = function(){
 		database = this.responseText;
-		test = database;
 		showCase.innerHTML = '';
 		fillShowCase(database);
 		setTimeout(function(){
@@ -469,7 +482,7 @@ function getGamecards(){
 	}
 
 	xhr.onerror = function(){
-		console.log('Erroe ' + this.status);
+		console.log('Error ' + this.status);
 	}
 }
 
