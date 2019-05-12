@@ -1,0 +1,314 @@
+.edit-form__wrapper{
+	width: 100vw;
+	height: 100vh;
+	position: fixed;
+	top: 0;
+	left: 0;
+}
+
+.edit-form{
+	background-color: #fff;
+	box-shadow: 0 1px 4px 0 rgba(32,33,36,0.28);
+	max-width: 1200px;
+	width: 85%;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	padding: 20px;
+	opacity: 1;
+	transition: opacity 0.4s;
+}
+
+.edit-form--hidden{
+	opacity: 0;
+}
+
+.edit-form__header{
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 32px;
+}
+
+.edit-form__info{
+	width: 100%;
+	padding-right: 20px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.edit-form__title-wrapper{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 30px;
+}
+
+.edit-form__title-input{
+	font-size: 32px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	transition: border-color 0.2s;
+}
+
+.edit-form__title-input:hover{
+	border-color: rgba(0, 0, 0, 0.6);
+}
+
+.edit-form__image-wrapper{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.edit-form__image-label{
+	width: 274px;
+	height: 274px;
+	border: 2px dashed rgba(0, 0, 0, 0.3);
+	box-sizing: border-box;
+	padding: 8px;
+	border-radius: 10px;
+	transition: border-color 0.2s, opacity 0.2s;
+}
+
+.edit-form__image{
+	min-width: 254px;
+	height: 254px;
+	box-sizing: border-box;
+}
+
+.edit-form__image-label:hover{
+	border-color: rgba(0, 0, 0, 0.6);
+}
+
+.edit-form__image-label--dragenter{
+	border-color: rgba(0, 0, 0, 1);
+	opacity: 0.6;
+}
+
+.edit-form__image-input{
+	display: none;
+}
+
+.edit-form__description{
+	font-family: "Open sans", Arial, sans-serif;
+	font-size: 16px;
+	width: 100%;
+	height: 200px;
+	resize: none;
+	padding-left: 10px;
+	padding-right: 10px;
+	box-sizing: border-box;
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	transition: border-color 0.2s;
+}
+
+.edit-form__description:hover{
+	border-color: rgba(0, 0, 0, 0.6);
+}
+
+.edit-form__footer{
+	display: flex;
+	margin-bottom: 30px;
+}
+
+.edit-form__price-input{
+	font-size: 24px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	transition: border-color 0.2s;
+	margin-right: 20px;
+	width: 170px;
+}
+
+.edit-form__price-input:hover{
+	border-color: rgba(0, 0, 0, 0.6);
+}
+
+.edit-form__video-input{
+	font-size: 24px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	transition: border-color 0.2s;
+}
+
+.edit-form__video-input:hover{
+	border-color: rgba(0, 0, 0, 0.6);
+}
+
+.edit-form__platforms{
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	display: flex;
+	justify-content: space-around;
+	width: 170px;
+	padding: 4px 0;
+	margin-left: auto;
+}
+
+.edit-form__platform-checkbox{
+	display: none;
+}
+
+.edit-form__platform-label{
+	display: block;
+	font-size: 0;
+	line-height: 0;
+	width: 42px;
+	height: 42px;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	/* margin-right: 13px; */
+	opacity: 0.1;
+	transition: opacity 0.2s;
+	cursor: pointer;
+}
+
+.edit-form__windows-label{
+	background-image: url(../img/icons/gamecard__win.svg);
+}
+
+.edit-form__mac-label{
+	background-image: url(../img/icons/gamecard__mac.svg);
+}
+
+.edit-form__steamos-label{
+	background-image: url(../img/icons/gamecard__steam.svg);
+}
+
+.edit-form__platform-label:hover{
+	opacity: 0.2;
+}
+
+.edit-form__platform-checkbox:checked + .edit-form__platform-label{
+	opacity: 0.4;
+}
+
+.edit-form__submit-wrapper{
+	margin: 0 auto;
+	display: flex;
+}
+
+.edit-form__button{
+	background-color: transparent;
+	border: none;
+	border-radius: 5px;
+	font-size: 16px;
+	padding: 10px;
+	margin-right: 20px;
+	cursor: pointer;
+	box-shadow: 0 1px 4px 0 rgba(32,33,36,0.28);
+	width: 138px;
+	box-sizing: border-box;
+	transition: box-shadow 0.2s;
+	font-family: "Open sans", Arial, sans-serif;
+	text-align: center;
+}
+
+.edit-form__button:hover{
+	box-shadow: 0 3px 6px 0 rgba(32,33,36,0.6);
+}
+
+.edit-form__button:focus{
+	outline: none;
+	box-shadow: 0 3px 6px 0 rgba(32,33,36,0.6);
+}
+
+.edit-form__button--accept{
+	background-color: #1a73e8;
+	color: #fff;
+}
+
+.edit-form__button--delete{
+	margin: 0;
+	margin-left: auto;
+	color: #fff;
+	background-color: #ff6868;
+}
+
+.edit-form__error-locked{
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: #fff;
+	box-shadow: 0 1px 8px 0 rgba(32, 33, 36, 0.6);
+	width: 600px;
+	height: 60px;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	opacity: 0;
+	transition: opacity 0.4s;
+}
+
+.edit-form__error-locked-text{
+	margin: 0;
+	font-size: 18px;
+}
+
+.edit-form__error-locked--hidden{
+	display: none;
+}
+
+@keyframes shake{
+	0%{
+		transform: translateX(0);
+	}
+	10%{
+		transform: translateX(10px);
+	}
+	30%{
+		transform: translateX(-10px);
+	}
+	60%{
+		transform: translateX(10px);
+	}
+	90%{
+		transform: translateX(-10px);
+	}
+	100%{
+		transform: translateX(0);
+	}
+}
+
+.edit-form__input--invalid{
+	border-color: #ff6868;
+	transition: border-color 0.2s;
+	animation: shake 0.4s;
+}
+
+.edit-form__delete-modal{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.edit-form__delete-modal--hidden{
+	display: none;
+}
+
+.delete-modal{
+	background-color: #fff;
+	box-shadow: 0 1px 4px 0 rgba(32,33,36,0.28);
+	padding: 25px;
+}
+
+.delete-modal__text{
+	margin: 0;
+	margin-bottom: 20px;
+}
+
+.delete-modal__button-wrapper{
+	display: flex;
+	justify-content: center;
+}
+
+.delete-modal__button{
+	margin: 0 10px;
+}

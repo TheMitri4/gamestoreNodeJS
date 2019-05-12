@@ -1,65 +1,207 @@
-// function createGamecard(obj){
-// 	let gamecard = document.createElement('div');
-// 	let gamecardHeader = document.createElement('header');
-// 	let gamecardInfo = document.createElement('div');
-// 	let gamecardTitleWrapper = document.createElement('div');
-// 	let gamecardTitle = document.createElement('h3');
-// 	let gamecardRating = document.createElement('p');
-// 	let gamecardDescription = document.createElement('p');
-// 	let gamecardImage = document.createElement('img');
-// 	let gamecardFooter = document.createElement('footer');
-// 	let gamecardPrice = document.createElement('p');
-// 	let gamecardPlatforms = document.createElement('div');
-	
-// 	gamecard.classList.add('showcase__card', 'gamecard');
-// 	gamecardHeader.classList.add('gamecard__header');
+let saveErrorMessage = document.querySelector('.error-message--save');
+let loadErrorMessage = document.querySelector('.error-message--load');
+let showCase = document.querySelector('.showcase');
 
-// 	gamecardTitleWrapper.classList.add('gamecard__title-wrapper');
-// 	gamecardTitle.classList.add('gamecard__title');
-// 	gamecardRating.classList.add('gamecard__rating');
-// 	gamecardDescription.classList.add('gamecard__description');
-// 	gamecardImage.classList.add('gamecard__image');
-// 	gamecardFooter.classList.add('gamecard__footer');
-// 	gamecardPrice.classList.add('gamecard__price');
-// 	gamecardPlatforms.classList.add('gamecard__platforms');
+function showError(errorMessage){
+	errorMessage.classList.remove('error-message--hidden');
+	setTimeout(() => {
+		errorMessage.style.opacity = 1;
+	},10);
+	function removeMessage(){
+		errorMessage.classList.add('error-message--hidden');
+		errorMessage.removeEventListener('transitionend', removeMessage);
+	}
+	setTimeout(() => {
+		errorMessage.style.opacity = 0;
+		errorMessage.addEventListener('transitionend', removeMessage);
+	}, 1200);
+}
 
-// 	gamecardImage.setAttribute('alt', obj.title);
-// 	gamecardImage.setAttribute('src', obj.image || 'img/placeholder.png');
-// 	gamecardImage.setAttribute('width', 170);
-// 	gamecardImage.setAttribute('height', 170);
-// 	gamecardTitle.innerText = obj.title;
-// 	gamecardRating.innerText = obj.rating;
-// 	gamecardDescription.innerText = obj.description || 'Описание отсутствует';
-// 	gamecardPrice.innerText = obj.price === 0 ? 'Бесплатно' : obj.price + 'р';
+function fillShowCase(database, order = filterButton.dataset.order, searchingTitle = searchInput.value){
+	let databaseParsed = JSON.parse(database);
+	if(databaseParsed.length === 0){
+		let item = document.createElement('h1');
+		item.innerText = 'Игры не найдены';
+		item.classList.add('search__error-title');
+		showCase.appendChild(item);
+		return;
+	}
 
-// 	gamecard.appendChild(gamecardHeader);
-// 	gamecardHeader.appendChild(gamecardInfo);
-// 	gamecardInfo.appendChild(gamecardTitleWrapper);
-// 	gamecardTitleWrapper.appendChild(gamecardTitle);
-// 	gamecardTitleWrapper.appendChild(gamecardRating);
-// 	gamecardInfo.appendChild(gamecardDescription);
-// 	gamecardHeader.appendChild(gamecardImage);
-// 	gamecard.appendChild(gamecardFooter);
-// 	gamecardFooter.appendChild(gamecardPrice);
-// 	gamecardFooter.appendChild(gamecardPlatforms);
-	
-// 	if(Array.isArray(obj.platform)){
-// 		obj.platform.forEach(item => {
-// 			let gamecardPlatform = document.createElement('p');
-// 			gamecardPlatform.classList.add('gamecard__platform');
-// 			if(item.toLowerCase() === 'windows'){
-// 				gamecardPlatform.classList.add('gamecard__win');
-// 			}else if(item.toLowerCase() === 'macos'){
-// 				gamecardPlatform.classList.add('gamecard__mac-os');
-// 			}else{
-// 				gamecardPlatform.classList.add('gamecard__steam');
-// 			}
-// 			gamecardPlatforms.appendChild(gamecardPlatform);
-// 		});
-// 	}
-// 	gamecardInfo.classList.add('gamecard__info');
-// 	return gamecard;
-// }
+	if(searchingTitle){
+		databaseParsed = databaseParsed.filter(item => {
+			if(item.title.toLowerCase().includes(searchingTitle.toLowerCase())){
+				return true;
+			}
+		});
+		if(databaseParsed.length === 0){
+			let item = document.createElement('h1');
+			item.innerText = 'Игра, соответствующая запросу не найдена';
+			item.classList.add('search__error-title');
+			showCase.appendChild(item);
+			showCase.appendChild(returnButton());
+			return;
+		}
+	}
+
+	if(order === 'title'){
+		databaseParsed.sort((a, b) => {
+			if(a.title.toLowerCase() > b.title.toLowerCase()){
+				return 1;
+			}
+			if(a.title.toLowerCase() < b.title.toLowerCase()){
+				return -1;
+			}
+			return 0;
+		});
+		if(filterButton.dataset.direction === 'down'){
+			databaseParsed.reverse();
+		}
+	}else{
+		databaseParsed.sort((a, b) => a[order] - b[order]);
+		if(filterButton.dataset.direction === 'down'){
+			databaseParsed.reverse();
+		}
+	}
+
+	let wrapper = document.createDocumentFragment();
+	databaseParsed.forEach(item => {
+		let child = browserJSEngine(gamecardTemplate(item));
+		if(child.classList.contains('gamecard__editable')){
+			child.addEventListener('click', () => {
+				showEditForm(child.dataset.id);
+			})
+		}else{
+			child.addEventListener('click', () => {
+				showOpenedGame(child.dataset.id);
+			})
+		}
+		wrapper.appendChild(child);
+	})
+	showCase.appendChild(wrapper);
+	if(searchingTitle){
+		showCase.appendChild(returnButton());
+	}
+}
+
+let blurWrapper = document.querySelector('.blur-wrapper');
+
+function getGamecards(order, searchingTitle){
+	let database;
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'db/database.json', true);
+	xhr.send();
+
+	let loader = document.querySelector('.loader__wrapper');
+	loader.classList.remove('hidden');
+	blurWrapper.classList.add('blur-effect');
+
+	xhr.onload = function(){
+		if(xhr.status === 200){
+			database = this.responseText;
+			showCase.innerHTML = '';
+			fillShowCase(database, order, searchingTitle);
+			setTimeout(function(){
+				loader.classList.add('hidden');
+				blurWrapper.classList.remove('blur-effect');
+			}, 300);
+		}else{
+			showError(loadErrorMessage);
+		}
+	}
+
+	xhr.onerror = function(){
+		console.log('Error ' + this.status);
+		showError(loadErrorMessage);
+	}
+}
+
+window.addEventListener('DOMContentLoaded' , () => {
+	getGamecards();
+});
+
+// Calculating scroll width
+
+var scrollDiv = document.createElement('div');
+scrollDiv.style.overflowY = 'scroll';
+scrollDiv.style.width = '50px';
+scrollDiv.style.height = '50px';
+scrollDiv.style.visibility = 'hidden';
+document.body.appendChild(scrollDiv);
+var scrollWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+document.body.removeChild(scrollDiv);
+
+
+//filter
+
+let filterButton = document.querySelector('.filter__button');
+let filterList = document.querySelector('.filter__list');
+
+document.addEventListener('click', (event) => {
+	event.stopPropagation();
+	if(event.target != filterList && !filterList.contains(event.target)){
+		filterList.classList.add('filter__list--hidden');
+	}
+});
+
+filterButton.addEventListener('click', (event) => {
+	event.stopPropagation();
+	event.preventDefault();
+	filterList.classList.toggle('filter__list--hidden');
+})
+
+filterList.addEventListener('click', (event) => {
+	event.stopPropagation();
+	filterList.classList.add('filter__list--hidden');
+	[event.target.innerText , filterButton.innerText] = [filterButton.innerText ,event.target.innerText];
+	[event.target.dataset.order , filterButton.dataset.order] = [filterButton.dataset.order ,event.target.dataset.order];
+	[event.target.dataset.direction , filterButton.dataset.direction] = [filterButton.dataset.direction ,event.target.dataset.direction];
+	getGamecards(filterButton.dataset.order);
+})
+
+
+//Search
+
+let searchInput = document.querySelector('.main-header__search');
+let searchButton = document.querySelector('.search__button');
+
+searchInput.addEventListener('change', function(){
+	getGamecards('title', this.value);
+});
+
+searchInput.addEventListener('focus', function(){
+	searchButton.style.display = 'block';
+	setTimeout(() => {
+		searchButton.classList.remove('search__button--hidden');
+	}, 10)
+});
+
+searchInput.addEventListener('blur', function(){
+	searchButton.classList.add('search__button--hidden');
+	setTimeout(() => {
+		searchButton.style = '';
+	}, 200)
+});
+
+searchButton.addEventListener('click', function(){
+	if(!searchInput.value){
+		return;
+	}
+	getGamecards('title', searchInput.value);
+})
+
+function returnButton(){
+	let returnButton = document.createElement('button');
+	returnButton.innerText = 'Вернуться';
+	returnButton.classList.add('button');
+	returnButton.classList.add('search__return-button');
+	returnButton.addEventListener('click', () => {
+		searchInput.value = '';
+		getGamecards();
+	});
+	return returnButton;
+}
+
 
 function browserJSEngine(block) {
 	if ((block === undefined) || (block === null) || (block === false)) {
@@ -83,6 +225,9 @@ function browserJSEngine(block) {
 
 	if (block.attrs) {
 		Object.keys(block.attrs).forEach(function(key) {
+			if(block.attrs[key] === ''){
+				element.setAttribute(key, true);
+			}
 			element.setAttribute(key, block.attrs[key]);
 		});
 	}
@@ -92,119 +237,4 @@ function browserJSEngine(block) {
 	}
 
 	return element;
-}
-
-let showCase = document.querySelector('.showcase');
-
-function fillShowCase(database){
-	
-	let databaseParsed = JSON.parse(database);
-	if(databaseParsed === 0){
-		return;
-	}
-	let wrapper = document.createDocumentFragment();
-	databaseParsed.forEach(item => {
-		wrapper.appendChild(browserJSEngine(gamecardTemplate(item)));
-	})
-	showCase.appendChild(wrapper);
-}
-
-let blurWrapper = document.querySelector('.blur-wrapper');
-
-window.addEventListener('DOMContentLoaded' , () => {
-	let database;
-
-	var xhr = new XMLHttpRequest();
-
-	xhr.open('GET', 'api/database.json', true);
-
-	xhr.send();
-
-	xhr.onload = function(){
-		database = this.responseText;
-		fillShowCase(database);
-		setTimeout(function(){
-			document.querySelector('.loader__wrapper').classList.add('hidden');
-			blurWrapper.classList.remove('blur-effect');
-		}, 1000);
-	}
-
-	xhr.onerror = function(){
-		console.log('Erroe ' + this.status);
-	}
-});
-
-function gamecardTemplate(obj){
-	let platformsClasses = {
-		windows: 'gamecard__win',
-		steamos: 'gamecard__steam',
-		macos: 'gamecard__mac-os'
-	}
-	return {
-		tag: 'div',
-		cls: ['showcase__card', 'gamecard'],
-		attrs: {"data-id": obj.id},
-		content: [
-			{
-				tag: 'header',
-				cls: 'gamecard__header',
-				content: [
-					{
-						tag: 'div',
-						cls: 'gamecard__info',
-						content: [
-							{
-								tag: 'div',
-								cls: 'gamecard__title-wrapper',
-								content: [
-									{
-										tag: 'h3',
-										cls: 'gamecard__title',
-										content: obj.title
-									},
-									{
-										tag: 'p',
-										cls: 'gamecard__rating',
-										content: obj.rating
-									}
-								]
-							},
-							{
-								tag: 'p',
-								cls: 'gamecard__description',
-								content: obj.description || 'Описание отсутствует'
-							}
-						]
-					},
-					{
-						tag: 'img',
-						cls: 'gamecard__image',
-						attrs: {src: obj.image || 'img/placeholder.png', alt: obj.title , width: '170', height: '170'}
-					}
-				]
-			},
-			{
-				tag: 'footer',
-				cls: 'gamecard__footer',
-				content: [
-					{
-						tag: 'p',
-						cls: 'gamecard__price',
-						content: obj.price === 0 ? 'Бесплатно' : obj.price + 'р'
-					},
-					{
-						tag: 'div',
-						cls: 'gamecard__platforms',
-						content: obj.platform.reduce((acc, item) => {
-							acc.push({
-								tag: 'p',
-								cls: ['gamecard__platform', platformsClasses[item.toLowerCase()]]
-							});
-							return acc;
-						}, [])
-					}
-				]
-			}
-		]
-	}
 }

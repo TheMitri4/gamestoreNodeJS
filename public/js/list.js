@@ -1,30 +1,30 @@
 function showEditForm(id){
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', `get?id=${id}`, true);
-	let result;
+	xhr.open('GET', `getEdit?id=${id}`, true);
 	xhr.send();
 	xhr.onload = function(){
 		if(xhr.status === 200){
-			result = JSON.parse(xhr.responseText);
-			createForm(result, '/edit', true, id);
-		}
-		if(xhr.status === 423){
+			createForm(JSON.parse(xhr.responseText), '/edit', true, id);
+		}else if(xhr.status === 423){
 			let errorBlock = document.querySelector('.edit-form__error-locked');
-			// errorBlock.style.display = 'flex';
 			errorBlock.classList.remove('edit-form__error-locked--hidden');
 			setTimeout(() => {
 				errorBlock.style.opacity = 1;
 			},10);
+			function removeErrorBlock(){
+				errorBlock.classList.add('edit-form__error-locked--hidden');
+				errorBlock.removeEventListener('transitionend', removeErrorBlock);
+			}
 			setTimeout(() => {
 				errorBlock.style.opacity = 0;
-				setTimeout(() => {
-					errorBlock.classList.add('edit-form__error-locked--hidden');
-				},400)
+				errorBlock.addEventListener('transitionend', removeErrorBlock);
 			}, 1200);
+		}else{
+			showError(loadErrorMessage);
 		}
 	}
 	xhr.onerror = function(){
-		console.log('Ошибка');
+		showError(loadErrorMessage);
 	}
 }
 
@@ -40,6 +40,7 @@ function sendEditForm(form, url, image){
 	let gameId = form.dataset.id;
 	let gameTitle = form.querySelector('.edit-form__title-input').value;
 	let gamePrice = form.querySelector('.edit-form__price-input').value;
+	let gameVideoLink = youtubeParser(form.querySelector('.edit-form__video-input').value);
 	let gameDescription = form.querySelector('.edit-form__description').value;
 
 	let formData = new FormData();
@@ -48,19 +49,27 @@ function sendEditForm(form, url, image){
 	formData.append('description', gameDescription);
 	formData.append('platform', platformsJson);
 	formData.append('price', gamePrice);
+	formData.append('videoLink', gameVideoLink);
 	formData.append('image', image);
 	
 	let xhr = new XMLHttpRequest();
 	xhr.open('POST', url, true);
 	xhr.send(formData);
+
 	xhr.onload = function(){
-		console.log('Все хорошо: ' + xhr.responseText);
-		hideForm(form);
-		getGamecards();
+		if(xhr.status === 200){
+			console.log('Все хорошо: ' + xhr.responseText);
+			hideForm(form);
+			getGamecards();
+		}else{
+			showError(saveErrorMessage);
+			form.querySelector('.edit-form__button--accept').disabled = false;
+		}	
 	}
-	
 	xhr.onerror = function(){
 		console.log('Ошибка: ' + xhr.statusText);
+		showError(saveErrorMessage);
+		form.querySelector('.edit-form__button--accept').disabled = false;
 	}
 }
 
@@ -82,18 +91,44 @@ function createForm(data, sendUrl, edit, id){
 			form.querySelector(platforms[item.toLowerCase()]).checked = true;
 		});
 		form.setAttribute('data-id', id);
+
+		let deleteModal = form.querySelector('.edit-form__delete-modal');
+		function showDeleteModal(){
+			deleteModal.classList.remove('edit-form__delete-modal--hidden');
+		}
+
+		function hideDeleteModal(){
+			deleteModal.classList.add('edit-form__delete-modal--hidden');
+		}
+
 		form.querySelector('.edit-form__button--delete').addEventListener('click', (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			showDeleteModal();
+		});
+		form.addEventListener('click', (event) => {
+			if(event.target != deleteModal && !deleteModal.contains(event.target)){
+				hideDeleteModal();
+			}
+		});
+		deleteModal.querySelector('.delete-modal__button--confirm').addEventListener('click', (event) => {
 			event.preventDefault();
 			deleteGame(form.dataset.id, form);
 		});
+		deleteModal.querySelector('.delete-modal__button--decline').addEventListener('click', (event) => {
+			event.preventDefault();
+			hideDeleteModal();
+		})
 	}else{
 		form.querySelector('.edit-form__button--delete').remove();
+		form.querySelector('.edit-form__delete-modal').remove();
+		form.querySelector('.edit-form__rating').remove();
 	}
 	document.body.appendChild(formWrap);
 	document.body.style.overflowY = 'hidden';
 	document.body.style.marginRight = `${scrollWidth}px`;
 	setTimeout(function(){
-		form.classList.remove('edit-form__hidden');
+		form.classList.remove('edit-form--hidden');
 		blurWrapper.classList.add('blur-effect');
 	}, 10);
 	
@@ -102,9 +137,8 @@ function createForm(data, sendUrl, edit, id){
 		if(event.target != form && !form.contains(event.target)){
 			event.target.addEventListener('mouseup', function(event){
 				if(clickStart == event.target){
-					unlockGame(id);
-					hideForm(form);
-					getGamecards();
+					unlockGame(id, getGamecards);
+					hideForm(form);			
 				}
 			})
 		}
@@ -112,19 +146,22 @@ function createForm(data, sendUrl, edit, id){
 
 	form.querySelector('.edit-form__button--decline').addEventListener('click', (event) => {
 		event.preventDefault();
-		unlockGame(id);
+		unlockGame(id, getGamecards);
 		hideForm(form);
-		getGamecards();
 	});
-	form.querySelector('.edit-form__button--accept').addEventListener('click', (event) => {
+	form.querySelector('.edit-form__button--accept').addEventListener('click', function(event){
 		event.preventDefault();
-		sendEditForm(form, sendUrl, newImage);
+		if(validateForm(form)){
+			sendEditForm(form, sendUrl, newImage);
+			this.disabled = true;
+		}
 	});
 	
-	let dropArea = form.querySelector('.edit-form__image');
+	let dropArea = form.querySelector('.edit-form__image-label');
+	let dropAreaImage = form.querySelector('.edit-form__image');
 
 	['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-		dropArea.addEventListener(eventName, preventDefaults, false);
+		dropAreaImage.addEventListener(eventName, preventDefaults, false);
 	});
 	function preventDefaults (event) {
 		event.preventDefault();
@@ -134,16 +171,82 @@ function createForm(data, sendUrl, edit, id){
 	let newImage;
 
 	form.querySelector('.edit-form__image-input').addEventListener('change', function(){
-		previewFile(this.files[0], dropArea);
+		previewFile(this.files[0], dropAreaImage);
 		newImage = this.files[0];
 	});
-	dropArea.addEventListener('drop', (event) => {
-		previewFile(event.dataTransfer.files[0], dropArea);
+	dropAreaImage.addEventListener('drop', (event) => {
+		previewFile(event.dataTransfer.files[0], dropAreaImage);
 		newImage = event.dataTransfer.files[0];
+		dropArea.classList.remove('edit-form__image-label--dragenter');
+	});
+	dropAreaImage.addEventListener('dragenter', (event) => {
+		dropArea.classList.add('edit-form__image-label--dragenter');
+	});
+	dropAreaImage.addEventListener('dragleave', (event) => {
+		dropArea.classList.remove('edit-form__image-label--dragenter');
 	});
 }
 
-function unlockGame(id){
+function validateForm(form){
+	let gameTitle = form.querySelector('.edit-form__title-input');
+	let gameDescription = form.querySelector('.edit-form__description');
+	let gamePrice = form.querySelector('.edit-form__price-input');
+	let gameVideoLink = form.querySelector('.edit-form__video-input');
+	let platformsContainer = form.querySelector('.edit-form__platforms');
+	let platforms = platformsContainer.querySelectorAll('.edit-form__platform-checkbox');
+	console.log(platforms);
+	let platformsArr = [];
+	platforms.forEach(item => {
+		if(item.checked){
+			platformsArr.push(true);
+		}
+	});
+
+	let results = [];
+
+	if(!gameTitle.value){
+		results.push(false);
+		gameTitle.classList.add('edit-form__input--invalid');
+		setTimeout(() => {
+			gameTitle.classList.remove('edit-form__input--invalid');
+		}, 1000);
+	}
+	if(!gameDescription.value){
+		results.push(false);
+		gameDescription.classList.add('edit-form__input--invalid');
+		setTimeout(() => {
+			gameDescription.classList.remove('edit-form__input--invalid');
+		}, 1000);
+	}
+	if(!gamePrice.value || gamePrice.value < 0){
+		results.push(false);
+		gamePrice.classList.add('edit-form__input--invalid');
+		setTimeout(() => {
+			gamePrice.classList.remove('edit-form__input--invalid');
+		}, 1000);
+	}
+	if(platformsArr.length === 0){
+		results.push(false);
+		platformsContainer.classList.add('edit-form__input--invalid');
+		setTimeout(() => {
+			platformsContainer.classList.remove('edit-form__input--invalid');
+		}, 1000);
+	}
+	if(!gameVideoLink.value || !youtubeParser(gameVideoLink.value)){
+		results.push(false);
+		gameVideoLink.classList.add('edit-form__input--invalid');
+		setTimeout(() => {
+			gameVideoLink.classList.remove('edit-form__input--invalid');
+		}, 1000);
+	}
+
+	if(results.length === 0){
+		return true;
+	}
+	return false;
+}
+
+function unlockGame(id, fn){
 	if(!id){
 		return;
 	}	
@@ -152,16 +255,18 @@ function unlockGame(id){
 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	let body = 'id=' + id;
 	xhr.send(body);
+	xhr.onload = function(){
+		fn();
+	}
 }
 
 function hideForm(form){
-	form.classList.add('edit-form__hidden');
+	form.classList.add('edit-form--hidden');
 	blurWrapper.classList.remove('blur-effect');
-	setTimeout(function(){
+	form.addEventListener('transitionend', () => {
 		form.parentNode.remove();	
 		document.body.style = '';
-	}, 400);
-	// setTimeout(getGamecards(),200);
+	})
 }
 
 function previewFile(file, container){
@@ -179,13 +284,190 @@ function deleteGame(id, form){
 	let body = 'id=' + id;
 	xhr.send(body);
 	xhr.onload = function(){
-		console.log('Игра ' + id + ' удалена');
-		hideForm(form);
-		getGamecards();
+		if(xhr.status === 200){
+			hideForm(form);
+			getGamecards();
+		}else{
+			showError(saveErrorMessage);
+		}
 	}
 	xhr.onerror = function(){
-		console.log('Ошибка');
+		showError(saveErrorMessage);
 	}
+}
+
+function editFormTemplate(obj = {}) {
+	return {
+		tag: 'div',
+		cls: 'edit-form__wrapper',
+		content: {
+			tag: 'form',
+			cls: ['edit-form', 'edit-form--hidden'],
+			attrs: { action: ``, name: 'editform'},
+			content: [
+				{
+					tag: 'header',
+					cls: 'edit-form__header',
+					content: [
+						{
+							tag: 'div',
+							cls: 'edit-form__info',
+							content: [
+								{
+									tag: 'div',
+									cls: 'edit-form__title-wrapper',
+									content: [
+										{
+											tag: 'input',
+											cls: 'edit-form__title-input',
+											attrs: {autocomplete: 'off',type: 'text', name: 'title', value: obj.title || '', placeholder: 'Введите название'}
+										},
+										{
+											tag: 'p',
+											cls: ['edit-form__rating', 'gamecard__rating'],
+											content: obj.rating ? obj.rating.toFixed(1) : '0'
+										}
+									]
+								},
+								{
+									tag: 'textarea',
+									cls: 'edit-form__description',
+									attrs: {name: 'description', placeholder: 'Введите описание'},
+									content: obj.description || ''
+								}
+							]
+						},
+						{
+							tag: 'div',
+							cls: 'edit-form__image-wrapper',
+							content: [
+								{
+									tag: 'label',
+									attrs: {for: 'image-upload'},
+									cls: 'edit-form__image-label',
+									content:{
+										tag: 'img',
+										cls: 'edit-form__image',
+										attrs: {src: obj.image || 'img/gameImg/placeholder.png', alt: obj.title || 'Загрузите картинку', width: '170', height: '170'}
+									}
+								},
+								{
+									tag: 'input',
+									cls: 'edit-form__image-input',
+									attrs: {type: 'file', name: 'image', id: 'image-upload'}
+								}
+							]
+						}
+					]
+				},
+				{
+					tag: 'footer',
+					cls: 'edit-form__footer',
+					content: [
+						{
+							tag: 'input',
+							cls: 'edit-form__price-input',
+							attrs: {autocomplete: 'off', min: 0, type: 'number', name: 'price', value: obj.price + '' || '', placeholder: 'Введите цену'}
+						},
+						{
+							tag: 'input',
+							cls: 'edit-form__video-input',
+							attrs: {autocomplete: 'off',
+									type: 'text', 
+									name: 'videoLink', 
+									value: obj.videoLink ? 'https://www.youtube.com/watch?v=' + obj.videoLink : '', 
+									placeholder: 'Ссылка на видео'}
+						},
+						{
+							tag: 'div',
+							cls: 'edit-form__platforms',
+							content: [
+								{
+									tag: 'input',
+									cls: 'edit-form__platform-checkbox',
+									attrs: {type: 'checkbox', name: 'Windows', id: 'windows'}
+								},
+								{
+									tag: 'label',
+									cls: ['edit-form__platform-label', 'edit-form__windows-label'],
+									attrs: {for: 'windows'}
+								},
+								{
+									tag: 'input',
+									cls: 'edit-form__platform-checkbox',
+									attrs: {type: 'checkbox', name: 'MacOs', id: 'mac'}
+								},
+								{
+									tag: 'label',
+									cls: ['edit-form__platform-label', 'edit-form__mac-label'],
+									attrs: {for: 'mac'}
+								},
+								{
+									tag: 'input',
+									cls: 'edit-form__platform-checkbox',
+									attrs: {type: 'checkbox', name: 'SteamOs', id: 'steamos'}
+								},
+								{
+									tag: 'label',
+									cls: ['edit-form__platform-label', 'edit-form__steamos-label'],
+									attrs: {for: 'steamos'}
+								}
+							]
+						}
+					]
+				},
+				{
+					tag: 'div',
+					cls: 'edit-form__submit-wrapper',
+					content: [
+						{
+							tag: 'button',
+							cls: ['edit-form__button', 'edit-form__button--accept'],
+							attrs: {type: 'submit'},
+							content: 'Сохранить'
+						},
+						{
+							tag: 'button',
+							cls: ['edit-form__button', 'edit-form__button--decline'],
+							content: 'Отменить'
+						},
+						{
+							tag: 'button',
+							cls: ['edit-form__button', 'edit-form__button--delete'],
+							content: 'Удалить'
+						}
+					]
+				},
+				{
+					tag: 'div',
+					cls: ['edit-form__delete-modal', 'delete-modal', 'edit-form__delete-modal--hidden'],
+					content: [
+						{
+							tag: 'p',
+							cls: 'delete-modal__text',
+							content: 'Вы действительно хотите удалить данную игры?'
+						},
+						{
+							tag: 'div',
+							cls: 'delete-modal__button-wrapper',
+							content: [
+								{
+									tag: 'button',
+									cls: ['edit-form__button', 'edit-form__button--delete', 'delete-modal__button', 'delete-modal__button--confirm'],
+									content: 'Да'
+								},
+								{
+									tag: 'button',
+									cls: ['edit-form__button', 'delete-modal__button', 'delete-modal__button--decline'],
+									content: 'Нет'
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	}	
 }
 
 function gamecardTemplate(obj){
@@ -196,7 +478,7 @@ function gamecardTemplate(obj){
 	}
 	return {
 		tag: 'div',
-		cls: ['showcase__card', 'gamecard'],
+		cls: ['showcase__card', 'gamecard', 'gamecard__editable'],
 		attrs: {"data-id": obj.id},
 		content: [
 			{
@@ -219,7 +501,7 @@ function gamecardTemplate(obj){
 									{
 										tag: 'p',
 										cls: 'gamecard__rating',
-										content: obj.rating + ''
+										content: obj.rating.toFixed(1) || 0
 									}
 								]
 							},
@@ -233,7 +515,7 @@ function gamecardTemplate(obj){
 					{
 						tag: 'img',
 						cls: 'gamecard__image',
-						attrs: {src: obj.image || 'img/placeholder.png', alt: obj.title , width: '170', height: '170'}
+						attrs: {src: obj.image || 'img/gameImg/placeholder.png', alt: obj.title , width: '170', height: '170'}
 					}
 				]
 			},
@@ -244,7 +526,7 @@ function gamecardTemplate(obj){
 					{
 						tag: 'p',
 						cls: 'gamecard__price',
-						content: obj.price === 0 ? 'Бесплатно' : obj.price + 'р'
+						content: obj.price == 0 ? 'Бесплатно' : obj.price + '₽'
 					},
 					{
 						tag: 'div',
@@ -263,240 +545,10 @@ function gamecardTemplate(obj){
 	}
 }
 
-function editFormTemplate(obj = {}) {
-	return {
-		tag: 'div',
-		cls: 'edit-form__wrapper',
-		content: {
-		tag: 'form',
-		cls: ['edit-form', 'edit-form__hidden'],
-		attrs: { action: ``, name: 'editform'},
-		content: [
-			{
-				tag: 'header',
-				cls: 'edit-form__header',
-				content: [
-					{
-						tag: 'div',
-						cls: 'edit-form__info',
-						content: [
-							{
-								tag: 'div',
-								cls: 'edit-form__title-wrapper',
-								content: [
-									{
-										tag: 'input',
-										cls: 'edit-form__title-input',
-										attrs: {type: 'text', name: 'title', value: obj.title || 'Введите название'}
-									},
-									{
-										tag: 'p',
-										cls: ['edit-form__rating', 'gamecard__rating'],
-										content: obj.rating || '0'
-									}
-								]
-							},
-							{
-								tag: 'textarea',
-								cls: 'edit-form__description',
-								attrs: {name: 'description'},
-								content: obj.description || 'Введите описание'
-							}
-						]
-					},
-					{
-						tag: 'div',
-						cls: 'edit-form__image-wrapper',
-						content: [
-							{
-								tag: 'label',
-								attrs: {for: 'image-upload'},
-								cls: 'edit-form__image-label',
-								content:{
-									tag: 'img',
-									cls: 'edit-form__image',
-									attrs: {src: obj.image || 'img/placeholder.png', alt: '', width: '170', height: '170'}
-								}
-							},
-							{
-								tag: 'input',
-								cls: 'edit-form__image-input',
-								attrs: {type: 'file', name: 'image', id: 'image-upload'}
-							}
-						]
-					}
-				]
-			},
-			{
-				tag: 'footer',
-				cls: 'edit-form__footer',
-				content: [
-					{
-						tag: 'input',
-						cls: 'edit-form__price-input',
-						attrs: {type: 'text', name: 'price', value: obj.price || 0}
-					},
-					{
-						tag: 'div',
-						cls: 'edit-form__platforms',
-						content: [
-							{
-								tag: 'input',
-								cls: 'edit-form__platform-checkbox',
-								attrs: {type: 'checkbox', name: 'Windows', id: 'windows'}
-							},
-							{
-								tag: 'label',
-								cls: ['edit-form__platform-label', 'edit-form__windows-label'],
-								attrs: {for: 'windows'}
-							},
-							{
-								tag: 'input',
-								cls: 'edit-form__platform-checkbox',
-								attrs: {type: 'checkbox', name: 'MacOs', id: 'mac'}
-							},
-							{
-								tag: 'label',
-								cls: ['edit-form__platform-label', 'edit-form__mac-label'],
-								attrs: {for: 'mac'}
-							},
-							{
-								tag: 'input',
-								cls: 'edit-form__platform-checkbox',
-								attrs: {type: 'checkbox', name: 'SteamOs', id: 'steamos'}
-							},
-							{
-								tag: 'label',
-								cls: ['edit-form__platform-label', 'edit-form__steamos-label'],
-								attrs: {for: 'steamos'}
-							}
-						]
-					}
-				]
-			},
-			{
-				tag: 'div',
-				cls: 'edit-form__submit-wrapper',
-				content: [
-					{
-						tag: 'button',
-						cls: ['edit-form__button', 'edit-form__button--accept'],
-						attrs: {type: 'submit'},
-						content: 'Сохранить'
-					},
-					{
-						tag: 'button',
-						cls: ['edit-form__button', 'edit-form__button--decline'],
-						content: 'Отменить'
-					},
-					{
-						tag: 'button',
-						cls: ['edit-form__button', 'edit-form__button--delete'],
-						content: 'Удалить'
-					}
-				]
-			}
-		]
-	}
+//YouTube
+
+function youtubeParser(url){
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+    var match = url.match(regExp);
+    return (match&&match[7].length==11)? match[7] : false;
 }
-}
-function browserJSEngine(block) {
-	if ((block === undefined) || (block === null) || (block === false)) {
-		return document.createTextNode('');
-	}
-	if ((typeof block === 'string') || (typeof block === 'number') || (block === true)) {
-		return document.createTextNode(block.toString());
-	}
-	if (Array.isArray(block)) {
-		return block.reduce(function(f, elem) {
-			f.appendChild(browserJSEngine(elem));
-
-			return f;
-		}, document.createDocumentFragment());
-	}
-	var element = document.createElement(block.tag || 'div');
-
-	element.classList.add(
-		...[].concat(block.cls).filter(Boolean)
-	);
-
-	if (block.attrs) {
-		Object.keys(block.attrs).forEach(function(key) {
-			if(block.attrs[key] === ''){
-				element.setAttribute(key, true);
-			}
-			element.setAttribute(key, block.attrs[key]);
-		});
-	}
-
-	if (block.content) {
-		element.appendChild(browserJSEngine(block.content));
-	}
-
-	return element;
-}
-
-let showCase = document.querySelector('.showcase');
-
-function fillShowCase(database){
-	
-	let databaseParsed = JSON.parse(database);
-	if(databaseParsed === 0){
-		return;
-	}
-	let wrapper = document.createDocumentFragment();
-	databaseParsed.forEach(item => {
-		let child = browserJSEngine(gamecardTemplate(item));
-		child.addEventListener('click', () => {
-			showEditForm(child.dataset.id);
-		})
-		wrapper.appendChild(child);
-	})
-	showCase.appendChild(wrapper);
-	// document.querySelector('.loader__wrapper').classList.add('hidden');
-	// blurWrapper.classList.remove('blur-effect');
-}
-
-let blurWrapper = document.querySelector('.blur-wrapper');
-
-function getGamecards(){
-	let database;
-
-	var xhr = new XMLHttpRequest();
-
-	xhr.open('GET', 'db/database.json', true);
-
-	xhr.send();
-
-	document.querySelector('.loader__wrapper').classList.remove('hidden');
-	blurWrapper.classList.add('blur-effect');
-
-	xhr.onload = function(){
-		database = this.responseText;
-		showCase.innerHTML = '';
-		fillShowCase(database);
-		setTimeout(function(){
-			document.querySelector('.loader__wrapper').classList.add('hidden');
-			blurWrapper.classList.remove('blur-effect');
-		}, 300);
-	}
-
-	xhr.onerror = function(){
-		console.log('Error ' + this.status);
-	}
-}
-
-window.addEventListener('DOMContentLoaded' , () => {
-	getGamecards();
-});
-
-// Calculating scroll width
-
-var scrollDiv = document.createElement('div');
-scrollDiv.style.overflowY = 'scroll';
-scrollDiv.style.width = '50px';
-scrollDiv.style.height = '50px';
-scrollDiv.style.visibility = 'hidden';
-document.body.appendChild(scrollDiv);
-var scrollWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
-document.body.removeChild(scrollDiv);

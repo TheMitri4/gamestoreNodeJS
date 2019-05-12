@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="css/main.css">
-	<link rel="stylesheet" href="css/edit-form.css">
+	<link rel="stylesheet" href="css/showcase.css">
 	<title>GameStore</title>
 </head>
 <body>
@@ -18,22 +18,20 @@
 				</label>
 			</header>
 		</div>
-		<section class="filter container">
+		<section class="filter filter--showcase container">
 			<p class="filter__title">Упорядочить по:</p>
-			<button class="filter__button button" data-order="title" data-direction="up">Алфавиту ↑</button>
-			<ul class="filter__list filter__list--hidden">
+			<button class="filter__button filter__button--showcase button" data-order="title" data-direction="up">Алфавиту ↑</button>
+			<ul class="filter__list filter__list--showcase filter__list--hidden">
 				<li class="filter__category" data-order="title" data-direction="down">Алфавиту ↓</li>				
 				<li class="filter__category" data-order="price" data-direction="up">Цене ↑</li>
 				<li class="filter__category" data-order="price" data-direction="down">Цене ↓</li>
 				<li class="filter__category" data-order="rating" data-direction="up">Рейтингу ↑</li>
 				<li class="filter__category" data-order="rating" data-direction="down">Рейтингу ↓</li>
 			</ul>
-			<a href="#" class="add__button button">Добавить</a>
 		</section>
-		<main class="showcase container">
-		</main>
+		<main class="showcase container"></main>
 	</div>
-	<p class="error-message error-message--hidden error-message--save">Ошибка при сохранении изменений</p>
+	<p class="error-message error-message--hidden error-message--vote">Ошибка при попытке оценить игру</p>
 	<p class="error-message error-message--hidden error-message--load">Ошибка при загрузке данных</p>
 	<div class="loader__wrapper">
 	<div class="loader">
@@ -49,10 +47,7 @@
 			</filter>
 		</defs>
 	</svg>
-	<div class="edit-form__error-locked edit-form__error-locked--hidden">
-		<p class="edit-form__error-locked-text">Данная игра уже редактируется</p>
-	</div>
 	<script src="js/main.js"></script>
-	<script src="js/list.js"></script>
+	<script src="js/showcase.js"></script>
 </body>
 </html>

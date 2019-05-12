@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="main.css">
+	<link rel="stylesheet" href="css/main.css">
 	<title>GameStore</title>
 </head>
 <body>
 	<div class="main-header__wrapper">
 		<header class="main-header container">
 			<h2 class="main-header__title">GameStore</h2>
+			<label class="search__label">
+				<input placeholder="Введите название" class="main-header__search" type="text" autocomplete="off">
+				<button class="search__button search__button--hidden">Найти</button>
+			</label>
 		</header>
 	</div>
 	<section class="filter container">
@@ -21,28 +25,7 @@
 			<a href="#" class="filter__link">Алфавиту</a>
 		</div>
 	</section>
-	<main class="showcase container showcase__blur">
-		<!-- <div class="showcase__card gamecard">
-			<header class="gamecard__header">
-				<div class="gamecard__info">
-					<div class="gamecard__title-wrapper">
-						<h3 class="gamecard__title">Dota 2</h3>
-						<p class="gamecard__rating">7.4</p>
-					</div>
-					<p class="gamecard__description">Ежедневно миллионы игроков по всему миру вступают в битву от лица одного из более сотни героев Dota 2. Неважно, будет это десятый или тысячный час в игре — в ней всегда есть место чему-то новому. Регулярные обновления не дают стоять на месте игровому процессу, возможностям и героям, отчего Dota 2 поистине живёт собственной жизнью.</p>
-				</div>
-				<img src="img/dota.jpg" alt="Dota2" width="170" height="170" class="gamecard__image">
-			</header>
-			<footer class="gamecard__footer">
-				<p class="gamecard__price">Free to play</p>
-				<div class="gamecard__platforms">
-					<p class="gamecard__platform gamecard__win">Windows</p>
-					<p class="gamecard__platform gamecard__steam">SteamOS</p>
-					<p class="gamecard__platform gamecard__mac-os">MacOs</p>
-				</div>
-			</footer>
-		</div> -->
-	</main>
+	<main class="showcase container showcase__blur"></main>
 	<div class="loader__wrapper">
 	<div class="loader">
 		<div class="inner one"></div>
