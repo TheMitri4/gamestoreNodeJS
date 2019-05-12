@@ -4,7 +4,15 @@ function showEditForm(id){
 	xhr.send();
 	xhr.onload = function(){
 		if(xhr.status === 200){
-			createForm(JSON.parse(xhr.responseText), '/edit', true, id);
+			let result;
+			try{
+				result = JSON.parse(xhr.responseText);
+			}catch(error){
+				showError(loadErrorMessage);
+				unlockGame(id);
+				return;
+			}
+			createForm(result, '/edit', true, id);
 		}else if(xhr.status === 423){
 			let errorBlock = document.querySelector('.edit-form__error-locked');
 			errorBlock.classList.remove('edit-form__error-locked--hidden');

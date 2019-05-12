@@ -18,8 +18,8 @@ function showError(errorMessage){
 }
 
 function fillShowCase(database, order = filterButton.dataset.order, searchingTitle = searchInput.value){
-	let databaseParsed = JSON.parse(database);
-	if(databaseParsed.length === 0){
+
+	if(database.length === 0){
 		let item = document.createElement('h1');
 		item.innerText = 'Игры не найдены';
 		item.classList.add('search__error-title');
@@ -28,12 +28,12 @@ function fillShowCase(database, order = filterButton.dataset.order, searchingTit
 	}
 
 	if(searchingTitle){
-		databaseParsed = databaseParsed.filter(item => {
+		database = database.filter(item => {
 			if(item.title.toLowerCase().includes(searchingTitle.toLowerCase())){
 				return true;
 			}
 		});
-		if(databaseParsed.length === 0){
+		if(database.length === 0){
 			let item = document.createElement('h1');
 			item.innerText = 'Игра, соответствующая запросу не найдена';
 			item.classList.add('search__error-title');
@@ -44,7 +44,7 @@ function fillShowCase(database, order = filterButton.dataset.order, searchingTit
 	}
 
 	if(order === 'title'){
-		databaseParsed.sort((a, b) => {
+		database.sort((a, b) => {
 			if(a.title.toLowerCase() > b.title.toLowerCase()){
 				return 1;
 			}
@@ -54,17 +54,17 @@ function fillShowCase(database, order = filterButton.dataset.order, searchingTit
 			return 0;
 		});
 		if(filterButton.dataset.direction === 'down'){
-			databaseParsed.reverse();
+			database.reverse();
 		}
 	}else{
-		databaseParsed.sort((a, b) => a[order] - b[order]);
+		database.sort((a, b) => a[order] - b[order]);
 		if(filterButton.dataset.direction === 'down'){
-			databaseParsed.reverse();
+			database.reverse();
 		}
 	}
 
 	let wrapper = document.createDocumentFragment();
-	databaseParsed.forEach(item => {
+	database.forEach(item => {
 		let child = browserJSEngine(gamecardTemplate(item));
 		if(child.classList.contains('gamecard__editable')){
 			child.addEventListener('click', () => {
@@ -86,9 +86,7 @@ function fillShowCase(database, order = filterButton.dataset.order, searchingTit
 let blurWrapper = document.querySelector('.blur-wrapper');
 
 function getGamecards(order, searchingTitle){
-	let database;
-
-	var xhr = new XMLHttpRequest();
+	let xhr = new XMLHttpRequest();
 	xhr.open('GET', 'db/database.json', true);
 	xhr.send();
 
@@ -98,7 +96,13 @@ function getGamecards(order, searchingTitle){
 
 	xhr.onload = function(){
 		if(xhr.status === 200){
-			database = this.responseText;
+			let database;
+			try{
+				database = JSON.parse(this.responseText);
+			}catch(error){
+				showError(loadErrorMessage);
+				return;
+			}
 			showCase.innerHTML = '';
 			fillShowCase(database, order, searchingTitle);
 			setTimeout(function(){

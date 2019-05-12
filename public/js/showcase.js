@@ -225,12 +225,19 @@ function openedGameTemplate(obj){
 }
 
 function showOpenedGame(id){
-	var xhr = new XMLHttpRequest();
+	let xhr = new XMLHttpRequest();
 	xhr.open('GET', `get?id=${id}`, true);
 	xhr.send();
 	xhr.onload = function(){
 		if(xhr.status === 200){
-			createOpenedGame(JSON.parse(xhr.responseText));
+			let result;
+			try{
+				result = JSON.parse(xhr.responseText)
+			}catch(error){
+				showError(loadErrorMessage);
+				return;
+			}
+			createOpenedGame(result);
 		}else{
 			showError(loadErrorMessage);
 		}
