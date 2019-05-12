@@ -109,9 +109,10 @@ function openedGameTemplate(obj){
 					content: [
 						{
 							tag: 'div',
-							cls: 'opened-game__video',
+							cls: 'opened-game__video-container',
 							content: {
 								tag: 'iframe',
+								cls: 'opened-game__video',
 								attrs: {width: '711', height: '400', frameborder: '0', allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: '' , src: 'https://www.youtube.com/embed/' + obj.videoLink + '?rel=0'}
 							}
 						},

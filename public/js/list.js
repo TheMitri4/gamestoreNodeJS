@@ -131,6 +131,8 @@ function createForm(data, sendUrl, edit, id){
 		form.querySelector('.edit-form__button--delete').remove();
 		form.querySelector('.edit-form__delete-modal').remove();
 		form.querySelector('.edit-form__rating').remove();
+		form.querySelector('.edit-form__title-input').classList.add('edit-form__title-input--add');
+		form.querySelector('.edit-form__submit-wrapper').classList.add('edit-form__submit-wrapper--add');
 	}
 	document.body.appendChild(formWrap);
 	document.body.style.overflowY = 'hidden';

@@ -132,8 +132,12 @@ function rateGame(id, rating){
 function _readDb() {
     return new Promise(resolve => {
         fs.readFile(dbPath, (error, data) => {
-            const database = JSON.parse(data);
-            resolve(database);
+            if(error){
+                reject(error)
+            }else{
+                const database = JSON.parse(data);
+                resolve(database);
+            } 
         });
     });
 }
