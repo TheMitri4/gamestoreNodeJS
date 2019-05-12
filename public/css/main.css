@@ -478,7 +478,6 @@ button::-moz-focus-inner {
 }
 
 @media(max-width: 600px){
-
 	.showcase{
 		padding: 15px;
 	}

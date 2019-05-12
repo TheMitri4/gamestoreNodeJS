@@ -4,6 +4,7 @@ const dirName = path.dirname(module.filename);
 const dbPath = path.resolve(dirName, 'database.json');
 const imgPath = path.resolve(dirName, '../img/gameImg');
 
+const timeToUnlockGameMs = 600000;
 const extensionFinder = /\.[0-9a-z]{1,5}$/;
 
 function Game(id, title, description, platforms, price, videoLink,imageUrl){
@@ -59,12 +60,25 @@ function getGameEdit(id) {
                 return 423;
             }
             result.locked = true;
+            setTimeout(() => {
+                unlockGameTime(id);
+            }, timeToUnlockGameMs);
             _writeDb(database);
             return result;
         } else {
             throw new Error('There is no game with id ' + id);
         }
     });
+}
+
+function unlockGameTime(id){
+    _readDb().then(database => {
+        let result = database.find(item => item['id'] === +id);
+        if(result.locked){
+            result.locked = false;
+            _writeDb(database);
+        }
+    })
 }
 
 function editGame(id, title, description, platforms, price, videoLink, image){

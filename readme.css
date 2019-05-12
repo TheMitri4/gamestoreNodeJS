@@ -1,0 +1,115 @@
+@font-face{
+	font-family: "Open sans";
+	src: url(public/fonts/opensansbold.woff);
+	font-weight: 700;
+	font-style: normal;
+}
+
+@font-face{
+	font-family: "Open sans";
+	src: url(public/fonts/opensans.woff2);
+	src: url(public/fonts/opensans.woff);
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face{
+	font-family: "Open sans";
+	src: url(public/fonts/opensanslight.woff2);
+	src: url(public/fonts/opensanslight.woff);
+	font-weight: 300;
+	font-style: normal;
+}
+
+body{
+	margin: 0;
+	padding: 0;
+	background-color: #f6f5f3;
+	font-size: 16px;
+	font-family: "Open sans", Arial, sans-serif;
+	overflow-x: hidden;
+	min-height: 100vh;
+}
+
+.container{
+	margin: 0 auto;
+	padding: 0 20px;
+	-webkit-box-sizing: border-box;
+	        box-sizing: border-box;
+	min-width: 320px;
+}
+
+@media(min-width: 960px){
+	.container{
+		min-width: 960px;
+		width: 50%;
+	}
+}
+
+@media(max-width: 600px){
+	.container{
+		padding: 0 15px;
+	}
+}
+
+.main-header__wrapper{
+	background-color: #fff;
+	-webkit-box-shadow: 0 1px 6px 0 rgba(32,33,36,0.28);
+	        box-shadow: 0 1px 6px 0 rgba(32,33,36,0.28);
+	margin-bottom: 40px;
+}
+
+.main-header{
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-pack: justify;
+	    -ms-flex-pack: justify;
+	        justify-content: space-between;
+	-webkit-box-align: center;
+	    -ms-flex-align: center;
+	        align-items: center;
+}
+
+.main-header__title{
+	margin: 0;
+	padding: 30px 0;
+	text-transform: uppercase;
+	font-size: 30px;
+}
+
+@media(max-width: 600px){
+	.main-header__wrapper{
+		margin-bottom: 25px;
+	}
+
+	.main-header__title{
+		font-size: 22px;
+	}
+}
+
+.showcase{
+	background-color: #fff;
+	-webkit-box-shadow: 0 1px 4px 0 rgba(32,33,36,0.28);
+	        box-shadow: 0 1px 4px 0 rgba(32,33,36,0.28);
+	padding: 40px;
+}
+
+@media(max-width: 950px){
+	.showcase{
+		padding: 25px;
+	}
+}
+
+@media(max-width: 600px){
+	.showcase{
+		padding: 15px;
+    }
+}
+
+p{
+    font-size: 16px;
+    line-height: 24px;
+    margin: 0;
+    margin-bottom: 15px;
+}

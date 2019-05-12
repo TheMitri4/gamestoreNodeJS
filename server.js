@@ -155,6 +155,6 @@ app.get('/list', function(req, res){
 	})
 });
 
-app.listen(3000, '192.168.0.104', function(){
+app.listen(3000, function(){
 	console.log('Server is running on port 3000');
 });
