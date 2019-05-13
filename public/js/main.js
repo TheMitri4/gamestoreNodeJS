@@ -83,16 +83,26 @@ function fillShowCase(database, order = filterButton.dataset.order, searchingTit
 	}
 }
 
-let blurWrapper = document.querySelector('.blur-wrapper');
+function showBlurWrapper(){
+	let blurWrapper = document.querySelector('.blur-wrapper');
+	let loader = document.querySelector('.loader__wrapper');
+	loader.classList.remove('hidden');
+	blurWrapper.classList.add('blur-effect');
+}
+
+function hideBlurWrapper(){
+	let blurWrapper = document.querySelector('.blur-wrapper');
+	let loader = document.querySelector('.loader__wrapper');
+	loader.classList.add('hidden');
+	blurWrapper.classList.remove('blur-effect');
+}
 
 function getGamecards(order, searchingTitle){
 	let xhr = new XMLHttpRequest();
 	xhr.open('GET', 'db/database.json', true);
 	xhr.send();
 
-	let loader = document.querySelector('.loader__wrapper');
-	loader.classList.remove('hidden');
-	blurWrapper.classList.add('blur-effect');
+	showBlurWrapper();
 
 	xhr.onload = function(){
 		if(xhr.status === 200){
@@ -106,17 +116,17 @@ function getGamecards(order, searchingTitle){
 			showCase.innerHTML = '';
 			fillShowCase(database, order, searchingTitle);
 			setTimeout(function(){
-				loader.classList.add('hidden');
-				blurWrapper.classList.remove('blur-effect');
+				hideBlurWrapper();
 			}, 300);
 		}else{
 			showError(loadErrorMessage);
+			hideBlurWrapper();
 		}
 	}
 
 	xhr.onerror = function(){
-		console.log('Error ' + this.status);
 		showError(loadErrorMessage);
+		hideBlurWrapper();
 	}
 }
 
